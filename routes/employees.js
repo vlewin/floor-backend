@@ -105,7 +105,7 @@ exports._all = function (request, response) {
 
 
 exports._search = function (request, response) {
-  console.log("*** findAll =>" + JSON.stringify(request.query))
+  console.log("*** search =>" + JSON.stringify(request.query))
 
   var search = request.query.search
   var page = parseInt(request.query.page) || 0
@@ -113,46 +113,31 @@ exports._search = function (request, response) {
 
   var opts = {
     scope: 'sub',
-    sizeLimit: limit * (page + 1)
+    filter: '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))'
   };
-
-  if (search) {
-    opts['filter'] = '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))';
-  } else {
-    opts['filter'] = '(objectClass=person)';
-  }
 
   console.log(opts)
 
   client.search(searchBase, opts, function (err, res) {
-    var employees = [];
-    var res_position = 0
+    var staff = [];
 
     res.on('searchEntry', function (entry) {
-      if (res_position >= page * limit) {
-        if (employees.length < limit) {
-          //console.log(entry.object)
-          employees.push(new Employee(entry.object))
-        }
-      } else {
-        res_position++;
-      }
+      console.log(entry.object)
+      staff.push(entry.object)
     });
 
-    res.on('error', function (err) {
-      console.log('Error: ' + err.message)
-      response.send(_.sortBy(employees, 'name'));
-    });
-
-    res.on('end', function (result) {
-      this.removeAllListeners('searchEntry');
-      this.removeAllListeners('end');
-      this.removeAllListeners('error');
-
-      response.send(_.sortBy(employees, 'name'));
+    res.on('end', function(result) {
+      var employees = []
+      var start = page * limit;
+      var end = start + limit;
+      console.log("range start: " + start + ' range end: ' + end)
+      staff = _.sortBy(staff, 'cn').slice(start, end)
+      for(i in staff) { employees.push(new Employee(staff[i])) }
+      response.send(employees);
     });
 
   })
+
 };
 
 exports.findAllFaked = function (request, response) {
