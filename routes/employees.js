@@ -154,6 +154,27 @@ exports.findByIdFaked = function (req, res) {
 
 };
 
+exports.latest = function(request, response) {
+  client.search(searchBase, { scope: 'sub', filter:'(!(ou=people))' }, function(req, res, next) {
+    var staff = [];
+
+    res.on('searchEntry', function (entry) {
+      staff.push(entry.object)
+    });
+
+    res.on('end', function(result) {
+      var employees = []
+
+      staff = _.sortBy(staff, 'suseid').reverse().slice(0,50)
+
+      for(i in staff) {
+        employees.push(new Employee(staff[i]))
+      }
+
+      response.send(employees);
+    });
+  })
+};
 
 exports.count = function (request, response) {
   client.search(searchBase, {attributes: 'id', scope: 'sub'}, function (req, res, next) {
