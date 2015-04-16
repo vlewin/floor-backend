@@ -1,4 +1,2 @@
-.architect
-bootstrap.json
-build/
-ext/
+fixtures/
+config.json
