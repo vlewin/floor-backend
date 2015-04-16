@@ -41,7 +41,6 @@ var client = ldap.createClient({
 
 exports.findAll = function (request, response) {
   var search = request.query.search
-
   if(search) {
     exports._search(request, response)
   } else {
@@ -52,35 +51,12 @@ exports.findAll = function (request, response) {
 
 exports._all = function (request, response) {
   console.log("*** _all =>" + JSON.stringify(request.query))
-  var page = parseInt(request.query.page) || 0
-  var limit = parseInt(request.query.limit) || 20
-  var start = page * limit;
-  var end = start + limit;
-
   var opts = {
     filter:'(!(ou=people))',
     scope: 'sub'
   };
 
-  client.search(searchBase, opts, function(req, res, next) {
-    var staff = [];
-
-    res.on('searchEntry', function (entry) {
-      staff.push(entry.object)
-    });
-
-    res.on('end', function(result) {
-      var employees = []
-
-      staff = _.sortBy(staff, 'cn').slice(start, end);
-
-      for(i in staff) {
-        employees.push(new Employee(staff[i]))
-      }
-
-      response.send(employees);
-    });
-  })
+  exports._query(opts, request, response)
 };
 
 
@@ -88,37 +64,39 @@ exports._search = function (request, response) {
   console.log("*** search =>" + JSON.stringify(request.query))
 
   var search = request.query.search
-  var page = parseInt(request.query.page) || 0
-  var limit = parseInt(request.query.limit) || 20
-
   var opts = {
     scope: 'sub',
     filter: '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))'
   };
 
-  console.log(opts)
+  exports._query(opts, request, response)
 
-  client.search(searchBase, opts, function (err, res) {
+};
+
+
+exports._query = function (opts, request, response) {
+  var page = parseInt(request.query.page) || 0
+  var limit = parseInt(request.query.limit) || 20
+  var start = page * limit;
+  var end = start + limit;
+
+  client.search(searchBase, opts, function(req, res) {
     var staff = [];
 
     res.on('searchEntry', function (entry) {
-      console.log(entry.object)
       staff.push(entry.object)
     });
 
     res.on('end', function(result) {
       var employees = []
-      var start = page * limit;
-      var end = start + limit;
-      console.log("range start: " + start + ' range end: ' + end)
-      staff = _.sortBy(staff, 'cn').slice(start, end)
+      staff = _.sortBy(staff, 'cn').slice(start, end);
       for(i in staff) { employees.push(new Employee(staff[i])) }
       response.send(employees);
     });
-
   })
 
-};
+}
+
 
 exports.findAllFaked = function (request, response) {
   console.log("*** findAllFaked =>" + JSON.stringify(request.query))
