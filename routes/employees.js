@@ -43,6 +43,19 @@ exports.findAll = function (request, response) {
   console.log("*** findAll =>" + JSON.stringify(request.query))
 
   var search = request.query.search
+
+  if(search) {
+    exports._search(request, response)
+  } else {
+    exports._all(request, response)
+  }
+};
+
+
+exports._all = function (request, response) {
+  console.log("*** findAll =>" + JSON.stringify(request.query))
+
+  var search = request.query.search
   var page = parseInt(request.query.page) || 0
   var limit = parseInt(request.query.limit) || 20
 
@@ -83,7 +96,60 @@ exports.findAll = function (request, response) {
       this.removeAllListeners('searchEntry');
       this.removeAllListeners('end');
       this.removeAllListeners('error');
+
       response.send(employees);
+    });
+
+  })
+};
+
+
+exports._search = function (request, response) {
+  console.log("*** findAll =>" + JSON.stringify(request.query))
+
+  var search = request.query.search
+  var page = parseInt(request.query.page) || 0
+  var limit = parseInt(request.query.limit) || 20
+
+  var opts = {
+    scope: 'sub',
+    sizeLimit: limit * (page + 1)
+  };
+
+  if (search) {
+    opts['filter'] = '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))';
+  } else {
+    opts['filter'] = '(objectClass=person)';
+  }
+
+  console.log(opts)
+
+  client.search(searchBase, opts, function (err, res) {
+    var employees = [];
+    var res_position = 0
+
+    res.on('searchEntry', function (entry) {
+      if (res_position >= page * limit) {
+        if (employees.length < limit) {
+          //console.log(entry.object)
+          employees.push(new Employee(entry.object))
+        }
+      } else {
+        res_position++;
+      }
+    });
+
+    res.on('error', function (err) {
+      console.log('Error: ' + err.message)
+      response.send(_.sortBy(employees, 'name'));
+    });
+
+    res.on('end', function (result) {
+      this.removeAllListeners('searchEntry');
+      this.removeAllListeners('end');
+      this.removeAllListeners('error');
+
+      response.send(_.sortBy(employees, 'name'));
     });
 
   })
