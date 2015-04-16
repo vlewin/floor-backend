@@ -43,7 +43,8 @@ exports.findAll = function(request, response) {
   console.log("*** findAll =>" +  JSON.stringify(request.query))
 
   var search = request.query.search
-  var limit = request.query.limit || 1000
+  var page = parseInt(request.query.page) || 0
+  var limit = parseInt(request.query.limit) || 50
 
   var opts = {
     scope: 'sub'
@@ -79,18 +80,20 @@ exports.findAll = function(request, response) {
 
 exports.findAllFaked = function(request, response) {
     console.log("*** findAllFaked =>" +  JSON.stringify(request.query))
-    var page = parseInt(request.query.page)
-    var limit = parseInt(request.query.limit)
+    var page = parseInt(request.query.page) || 0
+    var limit = parseInt(request.query.limit) || 50
+
+    console.log("page: " + page + ' limit: '+ limit)
 
     var employees = JSON.parse(fs.readFileSync('fixtures/_employees.json', 'utf8'))
 
     if(request.query.search) {
       employees = _.select(employees, function(employee){ return employee.uid == request.query.search; });
     } else {
-      var start = (page*limit) || 0;
+      var start = page*limit;
       var end = start+limit;
 
-      console.log("Start at: " + start + ' end: '+ end)
+      console.log("range start: " + start + ' range end: '+ end)
 
       employees = _.sortBy(employees, function(employee){ return employee.name }).slice(start,end);
     }
