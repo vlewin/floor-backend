@@ -29,6 +29,7 @@ app.get("/", function (request, response) {
 
 app.get('/employees', employees.findAllFaked);
 app.get('/employees/:id', employees.findByIdFaked);
+app.get('/latest', employees.latest);
 app.get('/count', employees.count);
 
 app.use(express.static(__dirname));
