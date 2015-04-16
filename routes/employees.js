@@ -52,7 +52,7 @@ exports.findAll = function (request, response) {
   };
 
   if (search) {
-    opts['filter'] = '(&(objectClass=person)(|(cn=*' + search + '*)(mail=*' + search + '*)))';
+    opts['filter'] = '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))';
   } else {
     opts['filter'] = '(objectClass=person)';
   }
@@ -64,7 +64,7 @@ exports.findAll = function (request, response) {
     var res_position = 0
 
     res.on('searchEntry', function (entry) {
-      if (res_position > page * limit) {
+      if (res_position >= page * limit) {
         if (employees.length < limit) {
           //console.log(entry.object)
           employees.push(new Employee(entry.object))
