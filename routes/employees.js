@@ -1,12 +1,12 @@
 var ldap = require('ldapjs');
-var path    = require("path");
+var path = require("path");
 var fs = require('fs');
 var _ = require('underscore');
 
 
 function Employee(object, fake) {
-  this.suseid = object.suseid;
-  this.uid = object.uid;
+  this.id = object.employeeNumber;
+  this.username = object.uid;
   this.name = object.cn;
 
   // this.first_name = object.sn
@@ -23,10 +23,10 @@ function Employee(object, fake) {
   this.room = object.roomNumber;
   this.link = 'http://floor.suse.de/floor.cgi?login=' + this.uid
 
-  if(fake) {
-    this.pic = 'https://randomuser.me/api/portraits/thumb/men/' + this.suseid + '.jpg'
+  if (fake) {
+    this.pic = 'https://randomuser.me/api/portraits/thumb/men/' + this.username + '.jpg'
   } else {
-    this.pic = 'http://floor.suse.de/gif.cgi/' + this.uid
+    this.pic = 'http://floor.suse.de/gif.cgi/' + this.username
   }
 };
 
@@ -39,133 +39,131 @@ var client = ldap.createClient({
 });
 
 
-exports.findAll = function(request, response) {
-  console.log("*** findAll =>" +  JSON.stringify(request.query))
+exports.findAll = function (request, response) {
+  console.log("*** findAll =>" + JSON.stringify(request.query))
 
   var search = request.query.search
   var page = parseInt(request.query.page) || 0
-  var limit = parseInt(request.query.limit) || 50
+  var limit = parseInt(request.query.limit) || 20
 
   var opts = {
-    scope: 'sub'
+    scope: 'sub',
+    sizeLimit: limit * (page + 1)
   };
 
-  if(search) {
-    opts['filter'] = '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))' //(roomNumber=*' + search + '*)
+  if (search) {
+    opts['filter'] = '(&(objectClass=person)(|(cn=*' + search + '*)(mail=*' + search + '*)))';
   } else {
-    opts['filter'] = '(!(ou=people))'
+    opts['filter'] = '(objectClass=person)';
   }
 
   console.log(opts)
 
-  client.search(searchBase, opts, function(err, res) {
+  client.search(searchBase, opts, function (err, res) {
     var employees = [];
+    var res_position = 0
 
     res.on('searchEntry', function (entry) {
-      if(employees.length < limit) {
-        employees.push(new Employee(entry.object))
+      if (res_position > page * limit) {
+        if (employees.length < limit) {
+          //console.log(entry.object)
+          employees.push(new Employee(entry.object))
+        }
       } else {
-        this.emit('end', res);
+        res_position++;
       }
     });
 
-    res.on('end', function(result) {
+    res.on('error', function (err) {
+      console.log('Error: ' + err.message)
+      response.send(employees);
+    });
+
+    res.on('end', function (result) {
       this.removeAllListeners('searchEntry');
       this.removeAllListeners('end');
-
-      response.send(employees.slice(0,limit));
+      this.removeAllListeners('error');
+      response.send(employees);
     });
+
   })
 };
 
-exports.findAllFaked = function(request, response) {
-    console.log("*** findAllFaked =>" +  JSON.stringify(request.query))
-    var page = parseInt(request.query.page) || 0
-    var limit = parseInt(request.query.limit) || 50
+exports.findAllFaked = function (request, response) {
+  console.log("*** findAllFaked =>" + JSON.stringify(request.query))
+  var page = parseInt(request.query.page) || 0
+  var limit = parseInt(request.query.limit) || 50
 
-    console.log("page: " + page + ' limit: '+ limit)
+  console.log("page: " + page + ' limit: ' + limit)
 
-    var employees = JSON.parse(fs.readFileSync('fixtures/_employees.json', 'utf8'))
+  var employees = JSON.parse(fs.readFileSync('fixtures/_employees.json', 'utf8'))
 
-    if(request.query.search) {
-      employees = _.select(employees, function(employee){ return employee.uid == request.query.search; });
-    } else {
-      var start = page*limit;
-      var end = start+limit;
+  if (request.query.search) {
+    employees = _.select(employees, function (employee) {
+      return employee.uid == request.query.search;
+    });
+  } else {
+    var start = page * limit;
+    var end = start + limit;
 
-      console.log("range start: " + start + ' range end: '+ end)
+    console.log("range start: " + start + ' range end: ' + end)
 
-      employees = _.sortBy(employees, function(employee){ return employee.name }).slice(start,end);
-    }
+    employees = _.sortBy(employees, function (employee) {
+      return employee.name
+    }).slice(start, end);
+  }
 
-    response.send(employees);
+  response.send(employees);
 };
 
 
-exports.findById = function(request, response) {
+exports.findById = function (request, response) {
   console.log("*** Find employee with ID: " + request.params.id)
 
   var opts = {
-    filter: "(suseid="+ request.params.id +")",
+    filter: "(employeeNumber=" + request.params.id + ")",
     scope: 'one'
   };
 
-  // var callback = function(employee) {
-  //   response.send(employee);
-  // };
-
-  client.search(searchBase, opts, function(req, res, next) {
-    // console.log("GETET ")
-    // console.log(opts)
-
+  client.search(searchBase, opts, function (req, res, next) {
     var employee = null;
 
     res.on('searchEntry', function (entry) {
-      console.log("searchEntry")
       console.log(entry.object)
       employee = new Employee(entry.object);
     });
 
-    res.on('end', function(result) {
-      console.log("end")
+    res.on('end', function (result) {
       response.send(employee);
     });
   })
 
-
-    // var id = req.params.id
-
-    // console.log('*** Requesting employee info for id: ' + id)
-
-    // employees = JSON.parse(fs.readFileSync('fixtures/employees.json', 'utf8'))
-    // employee = new Employee(employees[id-1]);
-
-    // res.send({});
-
 };
 
-exports.findByIdFaked = function(req, res) {
-    var id = req.params.id
+exports.findByIdFaked = function (req, res) {
+  var id = req.params.id
 
-    console.log('*** findByIdFaked: Requesting employee info for id: ' + id)
+  console.log('*** findByIdFaked: Requesting employee info for id: ' + id)
 
-    var employees = JSON.parse(fs.readFileSync('fixtures/_employees.json', 'utf8'))
-    var employee = _.find(employees, function(employee){ return employee.suseid == id; });
+  var employees = JSON.parse(fs.readFileSync('fixtures/_employees.json', 'utf8'))
+  var employee = _.find(employees, function (employee) {
+    return employee.suseid == id;
+  });
 
-    res.send(employee);
+  res.send(employee);
 
 };
 
 
-exports.count = function(request, response) {
-  client.search(searchBase, { attributes: 'id', scope: 'sub' }, function(req, res, next) {
+exports.count = function (request, response) {
+  client.search(searchBase, {attributes: 'id', scope: 'sub'}, function (req, res, next) {
     var count = 0;
 
     res.on('searchEntry', function (entry) {
       count++;
     });
 
-    res.on('end', function(result) {
+    res.on('end', function (result) {
       response.send({count: count});
     });
   })
