@@ -1,0 +1,11 @@
+{
+  "name": "floor-backend",
+  "description": "LDAP JSON API server (SUSE)",
+  "author": "Vladislav Lewin",
+  "dependencies": {
+    "express": "^4.12.3",
+    "ldapjs": ">= 0.7.1",
+    "underscore": ">= 1.8.3"
+  },
+  "engine": "node 0.10.32"
+}
