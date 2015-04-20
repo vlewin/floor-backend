@@ -26,6 +26,11 @@ exports.findById = function (request, response) {
 
 };
 
+exports.members = function (request, response) {
+  novell_ldap.members(request, response)
+};
+
+
 exports.latest = function (request, response) {
   suse_ldap.latest(request, response)
 };

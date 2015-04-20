@@ -34,3 +34,32 @@ exports.findById = function (id, callback) {
     });
   })
 }
+
+exports.members = function(request, response) {
+  var managerid = request.query.managerid;
+
+  var opts = {
+    filter: "(MANAGERWORKFORCEID=" + managerid + ")",
+    scope: 'sub'
+  };
+
+  client.search(searchBase, opts, function(req, res, next) {
+    var staff = [];
+
+    res.on('searchEntry', function (entry) {
+      staff.push(entry.object)
+    });
+
+    res.on('end', function(result) {
+      var employees = []
+
+      staff = _.sortBy(staff, 'suseid').reverse().slice(0,50)
+
+      for(i in staff) {
+        employees.push(new Employee(staff[i]))
+      }
+
+      response.send(employees);
+    });
+  })
+};
