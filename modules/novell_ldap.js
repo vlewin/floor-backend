@@ -50,7 +50,7 @@ exports.members = function(request, response) {
     res.on('searchEntry', function (entry) {
       employee = {
         id: entry.object.WORKFORCEID,
-        uid: entry.object.uid,
+        uid: entry.object.uid.toLowerCase(),
         cn: entry.object.FULLNAME,
         title: entry.object.title,
         mail: entry.object.mail,

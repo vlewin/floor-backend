@@ -1,5 +1,5 @@
 module.exports = function Employee(object, fake) {
-  this.id = object.employeeNumber;
+  this.id = object.id || object.employeeNumber;
   this.username = object.uid;
   this.name = object.cn;
 
@@ -7,7 +7,7 @@ module.exports = function Employee(object, fake) {
   // this.last_name = object.givenName
   // this.name = object.sn + ', ' + object.givenName
 
-  this.title = object.employeeType;
+  this.title = object.title || object.employeeType;
 
   this.email = object.mail;
   this.mobile = object.mobile || 'unknown';
