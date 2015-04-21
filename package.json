@@ -5,7 +5,8 @@
   "dependencies": {
     "express": "^4.12.3",
     "ldapjs": ">= 0.7.1",
-    "underscore": ">= 1.8.3"
+    "underscore": ">= 1.8.3",
+    "forever": ">= 0.14.1"
   },
   "engine": "node 0.10.32"
 }

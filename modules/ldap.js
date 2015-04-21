@@ -27,6 +27,7 @@ exports.findById = function (request, response) {
 };
 
 exports.members = function (request, response) {
+  console.log(JSON.stringify(request.query))
   novell_ldap.members(request, response)
 };
 

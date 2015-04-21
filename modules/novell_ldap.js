@@ -25,7 +25,8 @@ exports.findById = function (id, callback) {
       employee = {
         title: object.title,
         department: object.ou,
-        managerid: object.MANAGERWORKFORCEID
+        managerid: object.MANAGERWORKFORCEID,
+        manager: (entry.object.ISMANAGER == "TRUE")
       }
     });
 
@@ -36,10 +37,10 @@ exports.findById = function (id, callback) {
 }
 
 exports.members = function(request, response) {
-  var managerid = request.query.managerid;
+  var managerid = request.params.id;
 
   var opts = {
-    filter: "(MANAGERWORKFORCEID=" + managerid + ")",
+    filter: '(|(WORKFORCEID=' + managerid + ')(MANAGERWORKFORCEID=' + managerid + '))',
     scope: 'sub'
   };
 
@@ -47,13 +48,24 @@ exports.members = function(request, response) {
     var staff = [];
 
     res.on('searchEntry', function (entry) {
-      staff.push(entry.object)
+      employee = {
+        id: entry.object.WORKFORCEID,
+        uid: entry.object.uid,
+        cn: entry.object.FULLNAME,
+        title: entry.object.title,
+        mail: entry.object.mail,
+        mobile: entry.object.mobile || entry.object.telephoneNumber,
+        telephoneNumber: entry.object.telephoneNumber || entry.object.mobile,
+        manager: (entry.object.ISMANAGER == "TRUE")
+      }
+
+      staff.push(employee)
     });
 
     res.on('end', function(result) {
       var employees = []
 
-      staff = _.sortBy(staff, 'suseid').reverse().slice(0,50)
+      staff = _.sortBy(staff, 'name')
 
       for(i in staff) {
         employees.push(new Employee(staff[i]))
@@ -63,3 +75,5 @@ exports.members = function(request, response) {
     });
   })
 };
+
+

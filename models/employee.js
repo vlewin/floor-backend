@@ -16,6 +16,7 @@ module.exports = function Employee(object, fake) {
   this.location = object.l
   this.room = object.roomNumber;
   this.link = 'http://floor.suse.de/floor.cgi?login=' + this.username
+  this.manager = object.isManager || false
 
   if (fake) {
     this.pic = 'https://randomuser.me/api/portraits/thumb/men/' + this.username + '.jpg'

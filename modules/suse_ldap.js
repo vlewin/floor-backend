@@ -90,7 +90,6 @@ exports.findById = function (id, callback) {
   })
 }
 
-
 exports.latest = function(request, response) {
   client.search(searchBase, { scope: 'sub', filter:'(!(ou=people))' }, function(req, res, next) {
     var staff = [];
