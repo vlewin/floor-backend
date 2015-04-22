@@ -36,7 +36,7 @@ exports.findById = function (id, callback) {
   })
 }
 
-exports.members = function(request, response) {
+exports.team = function(request, response) {
   var managerid = request.params.id;
 
   var opts = {

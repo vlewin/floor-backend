@@ -16,7 +16,7 @@ app.use(function(req, res, next) {
 app.get("/", function (request, response) { response.send({ status: 'OK' }); })
 app.get('/employees', ldap.findAll);
 app.get('/employees/:id([0-9]+)', ldap.findById);
-app.get('/employees/:id([0-9]+)/team', ldap.members);
+app.get('/employees/:id([0-9]+)/team', ldap.team);
 app.get('/employees/latest', ldap.latest);
 app.get('/employees/count', ldap.count);
 

@@ -15,6 +15,7 @@ var client = ldap.createClient({
 
 exports.findAll = function (request, response) {
   var search = request.query.search
+
   if(search) {
     exports._search(request, response)
   } else {
@@ -24,7 +25,6 @@ exports.findAll = function (request, response) {
 
 
 exports._all = function (request, response) {
-  console.log("*** _all =>" + JSON.stringify(request.query))
   var opts = {
     filter:'(!(ou=people))',
     scope: 'sub'
@@ -35,8 +35,6 @@ exports._all = function (request, response) {
 
 
 exports._search = function (request, response) {
-  console.log("*** search =>" + JSON.stringify(request.query))
-
   var search = request.query.search
   var opts = {
     scope: 'sub',

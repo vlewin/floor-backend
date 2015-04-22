@@ -6,8 +6,6 @@ exports.findAll = function (request, response) {
 };
 
 exports.findById = function (request, response) {
-  console.log("*** Find employee with ID: " + request.params.id)
-
   var employee = null;
 
   // FIXME: use Node's EventEmitter
@@ -26,9 +24,8 @@ exports.findById = function (request, response) {
 
 };
 
-exports.members = function (request, response) {
-  console.log(JSON.stringify(request.query))
-  novell_ldap.members(request, response)
+exports.team = function (request, response) {
+  novell_ldap.team(request, response)
 };
 
 
