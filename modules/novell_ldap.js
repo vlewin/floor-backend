@@ -45,10 +45,10 @@ exports.members = function(request, response) {
   };
 
   client.search(searchBase, opts, function(req, res, next) {
-    var staff = [];
+    var employees = [];
 
     res.on('searchEntry', function (entry) {
-      employee = {
+      employee = new Employee({
         id: entry.object.WORKFORCEID,
         uid: entry.object.uid.toLowerCase(),
         cn: entry.object.FULLNAME,
@@ -56,20 +56,16 @@ exports.members = function(request, response) {
         mail: entry.object.mail,
         mobile: entry.object.mobile || entry.object.telephoneNumber,
         telephoneNumber: entry.object.telephoneNumber || entry.object.mobile,
-        manager: (entry.object.ISMANAGER == "TRUE")
-      }
+        isManager: (entry.object.ISMANAGER == "TRUE")
+      })
 
-      staff.push(employee)
+      employees.push(employee)
     });
 
     res.on('end', function(result) {
-      var employees = []
-
-      staff = _.sortBy(staff, 'name')
-
-      for(i in staff) {
-        employees.push(new Employee(staff[i]))
-      }
+      employees = _.sortBy(employees, function (o) {
+        return (o.id == managerid ? 'a_' : 'b_') +  o.name;
+      });
 
       response.send(employees);
     });

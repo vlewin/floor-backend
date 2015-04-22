@@ -3,10 +3,6 @@ module.exports = function Employee(object, fake) {
   this.username = object.uid;
   this.name = object.cn;
 
-  // this.first_name = object.sn
-  // this.last_name = object.givenName
-  // this.name = object.sn + ', ' + object.givenName
-
   this.title = object.title || object.employeeType;
 
   this.email = object.mail;
