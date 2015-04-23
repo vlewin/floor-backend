@@ -22,9 +22,13 @@ exports.findById = function (id, callback) {
 
     res.on('searchEntry', function (entry) {
       var object = entry.object
+
       employee = {
+        id: object.WORKFORCEID,
         title: object.title,
         department: object.ou,
+        mobile: object.mobile,
+        phone: object.telephoneNumber,
         managerid: object.MANAGERWORKFORCEID,
         manager: (entry.object.ISMANAGER == "TRUE")
       }
@@ -48,15 +52,17 @@ exports.team = function(request, response) {
     var employees = [];
 
     res.on('searchEntry', function (entry) {
+      var object = entry.object;
+
       employee = new Employee({
-        id: entry.object.WORKFORCEID,
-        uid: entry.object.uid.toLowerCase(),
-        cn: entry.object.FULLNAME,
-        title: entry.object.title,
-        mail: entry.object.mail,
-        mobile: entry.object.mobile || entry.object.telephoneNumber,
-        telephoneNumber: entry.object.telephoneNumber || entry.object.mobile,
-        isManager: (entry.object.ISMANAGER == "TRUE")
+        id: object.WORKFORCEID,
+        uid: object.uid.toLowerCase(),
+        cn: object.FULLNAME,
+        title: object.title,
+        mail: object.mail,
+        mobile: object.mobile,
+        telephoneNumber: object.telephoneNumber,
+        isManager: (object.ISMANAGER == "TRUE")
       })
 
       employees.push(employee)

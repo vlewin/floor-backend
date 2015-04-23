@@ -42,7 +42,6 @@ exports._search = function (request, response) {
   };
 
   exports._query(opts, request, response)
-
 };
 
 
@@ -70,6 +69,7 @@ exports._query = function (opts, request, response) {
 }
 
 exports.findById = function (id, callback) {
+  var id = id.startsWith('0') ? id.substring(1) : id;
   var opts = {
     filter: "(employeeNumber=" + id + ")",
     scope: 'one'
