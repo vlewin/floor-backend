@@ -11,11 +11,17 @@ var client = ldap.createClient({
   url: ldap_server
 });
 
+client.setMaxListeners(10);
+
 exports.findById = function (id, callback) {
   var opts = {
     filter: "(WORKFORCEID=" + id + ")",
     scope: 'one'
   };
+
+  client.on('error', function(err) {
+    console.log('ERROR:' + err);
+  });
 
   client.search(searchBase, opts, function(req, res) {
     var employee = null;
@@ -47,6 +53,10 @@ exports.team = function(request, response) {
     filter: '(|(WORKFORCEID=' + managerid + ')(MANAGERWORKFORCEID=' + managerid + '))',
     scope: 'sub'
   };
+
+  client.on('error', function(err) {
+    console.log('ERROR:' + err);
+  });
 
   client.search(searchBase, opts, function(req, res, next) {
     var employees = [];
