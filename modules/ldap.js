@@ -15,6 +15,7 @@ exports.findById = function (request, response) {
 
   // FIXME: use Node's EventEmitter
   // http://rob.conery.io/2012/04/05/cleaning-up-deep-callback-nesting-with-nodes-eventemitter/
+  // strongloop ??? => https://strongloop.com/strongblog/promises-in-node-js-with-q-an-alternative-to-callbacks/
   function getSUSEInfo(employee_info) {
     employee = employee_info
   }
@@ -43,10 +44,16 @@ exports.team = function (request, response) {
 };
 
 
-exports.latest = function (request, response) {
+exports.newcomers = function (request, response) {
   console.log('\nStarted GET "' + request.originalUrl + '"  ')
   console.log('Parameters: ' + JSON.stringify(request.params))
-  suse_ldap.latest(request, response)
+  suse_ldap.newcomers(request, response)
+};
+
+exports.apprentices = function (request, response) {
+  console.log('\nStarted GET "' + request.originalUrl + '"  ')
+  console.log('Parameters: ' + JSON.stringify(request.params))
+  novell_ldap.apprentices(request, response)
 };
 
 exports.count = function (request, response) {

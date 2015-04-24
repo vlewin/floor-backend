@@ -11,17 +11,17 @@ var client = ldap.createClient({
   url: ldap_server
 });
 
-client.setMaxListeners(10);
+client.on('error', function(err) {
+  console.log('ERROR:' + err);
+  return self.fail('Connection failed to LDAP server');
+});
+
 
 exports.findById = function (id, callback) {
   var opts = {
     filter: "(WORKFORCEID=" + id + ")",
     scope: 'one'
   };
-
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
 
   client.search(searchBase, opts, function(req, res) {
     var employee = null;
@@ -54,10 +54,6 @@ exports.team = function(request, response) {
     scope: 'sub'
   };
 
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
-
   client.search(searchBase, opts, function(req, res, next) {
     var employees = [];
 
@@ -69,9 +65,6 @@ exports.team = function(request, response) {
         uid: object.uid.toLowerCase(),
         cn: object.FULLNAME,
         title: object.title,
-        mail: object.mail,
-        mobile: object.mobile,
-        telephoneNumber: object.telephoneNumber,
         isManager: (object.ISMANAGER == "TRUE")
       })
 
@@ -88,4 +81,33 @@ exports.team = function(request, response) {
   })
 };
 
+exports.apprentices = function(request, response) {
+  var managerid = request.params.id;
 
+  var opts = {
+    filter: '|(title=Apprentice)(title=Auszubildener)',
+    scope: 'sub'
+  };
+
+  client.search(searchBase, opts, function(req, res, next) {
+    var apprentices = [];
+
+    res.on('searchEntry', function (entry) {
+      var object = entry.object;
+
+      apprentice = new Employee({
+        id: object.WORKFORCEID,
+        uid: object.uid.toLowerCase(),
+        cn: object.FULLNAME,
+        title: 'Apprentice',
+      })
+
+      apprentices.push(apprentice)
+    });
+
+    res.on('end', function(result) {
+      apprentices = _.sortBy(apprentices, 'name')
+      response.send(apprentices);
+    });
+  })
+};

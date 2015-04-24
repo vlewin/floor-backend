@@ -19,7 +19,8 @@ app.get("/", function (request, response) { response.send({ status: 'OK' }); })
 app.get('/employees', ldap.findAll);
 app.get('/employees/:id([0-9]+)', ldap.findById);
 app.get('/employees/:id([0-9]+)/team', ldap.team);
-app.get('/employees/latest', ldap.latest);
+app.get('/employees/newcomers', ldap.newcomers);
+app.get('/employees/apprentices', ldap.apprentices);
 app.get('/employees/count', ldap.count);
 
 app.use(express.static(__dirname));

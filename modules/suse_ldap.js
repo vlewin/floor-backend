@@ -12,7 +12,10 @@ var client = ldap.createClient({
   url: ldap_server
 });
 
-client.setMaxListeners(10);
+client.on('error', function(err) {
+  console.log('ERROR:' + err);
+  return self.fail('Connection failed to LDAP server');
+});
 
 exports.findAll = function (request, response) {
   var search = request.query.search
@@ -52,10 +55,6 @@ exports._query = function (opts, request, response) {
   var start = page * limit;
   var end = start + limit;
 
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
-
   client.search(searchBase, opts, function(req, res) {
     var staff = [];
 
@@ -80,10 +79,6 @@ exports.findById = function (id, callback) {
     scope: 'one'
   };
 
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
-
   client.search(searchBase, opts, function(req, res) {
     var employee = null;
 
@@ -97,12 +92,13 @@ exports.findById = function (id, callback) {
   })
 }
 
-exports.latest = function(request, response) {
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
+exports.newcomers = function(request, response) {
+  var opts = {
+    scope: 'sub',
+    filter:'(&(!(ou=people))(employeeNumber=*))'
+  }
 
-  client.search(searchBase, { scope: 'sub', filter:'(!(ou=people))' }, function(req, res, next) {
+  client.search(searchBase, opts, function(req, res, next) {
     var staff = [];
 
     res.on('searchEntry', function (entry) {
@@ -124,10 +120,6 @@ exports.latest = function(request, response) {
 };
 
 exports.count = function (request, response) {
-  client.on('error', function(err) {
-    console.log('ERROR:' + err);
-  });
-
   client.search(searchBase, {attributes: 'id', scope: 'sub'}, function (req, res, next) {
     var count = 0;
 
