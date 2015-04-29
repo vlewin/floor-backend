@@ -1,7 +1,15 @@
 {
-  "name": "floor-backend",
-  "description": "LDAP JSON API server (SUSE)",
+  "name": "staff-backend",
+  "description": "JSON API server for SUSE Employee Directory (staff.suse.de)",
   "author": "Vladislav Lewin",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vlewin/staff-backend"
+  },
+  "bugs": {
+    "url": "https://github.com/vlewin/staff-backend/issues"
+  },
   "dependencies": {
     "express": "^4.12.3",
     "ldapjs": ">= 0.7.1",
