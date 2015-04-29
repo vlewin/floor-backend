@@ -9,12 +9,13 @@ var ldap_server = config.suse_ldap_server
 var searchBase = 'ou=people,dc=suse,dc=de';
 
 var client = ldap.createClient({
-  url: ldap_server
+  url: ldap_server,
+  reconnect: true
 });
 
 client.on('error', function(err) {
   console.log('ERROR:' + err);
-  return self.fail('Connection failed to LDAP server');
+  return this.fail('Connection failed to LDAP server');
 });
 
 exports.findAll = function (request, response) {
@@ -42,7 +43,7 @@ exports._search = function (request, response) {
   var search = request.query.search
   var opts = {
     scope: 'sub',
-    filter: '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*))'
+    filter: '(|(givenName=*' + search + '*)(sn=*' + search + '*)(uid=*' + search + '*)(mail=*' + search + '*)(cn=*' + search + '*))'
   };
 
   exports._query(opts, request, response)

@@ -8,12 +8,13 @@ var ldap_server = config.novell_ldap_server
 var searchBase = 'o=Novell';
 
 var client = ldap.createClient({
-  url: ldap_server
+  url: ldap_server,
+  reconnect: true
 });
 
 client.on('error', function(err) {
   console.log('ERROR:' + err);
-  return self.fail('Connection failed to LDAP server');
+  return this.fail('Connection failed to LDAP server');
 });
 
 

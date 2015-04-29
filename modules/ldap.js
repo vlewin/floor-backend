@@ -3,7 +3,7 @@ var novell_ldap = require('./novell_ldap');
 
 exports.findAll = function (request, response) {
   console.log('\nStarted GET "' + request.originalUrl + '"  ')
-  console.log('Parameters: ' + JSON.stringify(request.params))
+  console.log('Parameters: ' + JSON.stringify(request.query))
   suse_ldap.findAll(request, response)
 };
 
