@@ -14,8 +14,9 @@ var client = ldap.createClient({
 });
 
 client.on('error', function(err) {
-  console.log('ERROR:' + err);
-  return this.fail('Connection failed to LDAP server');
+  console.error('ERROR:' + ' No connection to LDAP server');
+  console.error(err)
+  return false;
 });
 
 exports.findAll = function (request, response) {
