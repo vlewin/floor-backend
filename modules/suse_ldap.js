@@ -32,7 +32,7 @@ exports.findAll = function (request, response) {
 
 exports._all = function (request, response) {
   var opts = {
-    filter:'(!(ou=people))',
+    filter:'(&(!(ou=people))(employeeNumber=*))',
     scope: 'sub'
   };
 
