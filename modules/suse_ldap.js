@@ -14,9 +14,13 @@ var client = ldap.createClient({
 });
 
 client.on('error', function(err) {
-  console.error('ERROR:' + ' No connection to LDAP server');
-  console.error(err)
-  return false;
+  process.stderr.write('ERROR: No connection to LDAP server\n');
+  process.exit(1);
+});
+
+client.on('timeout', function (req) {
+  process.stderr.write('ERROR: Timeout reached\n');
+  process.exit(1);
 });
 
 exports.findAll = function (request, response) {
