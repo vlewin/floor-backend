@@ -5,7 +5,7 @@ var fs = require('fs');
 var _ = require('underscore');
 var ldap = require('./modules/ldap');
 var app = express();
-var portNumber = 3001;
+var portNumber = process.env.PORT || 3001;
 
 // app.use(express.static('public'));
 
